@@ -12,7 +12,7 @@
 clearvars; close all
 
 
-case_study = 1; % 0 = synthetic; 1 = Mono Basin; 2 = Newberry; 3 = LdMVF
+case_study = 2; % 0 = synthetic; 1 = Mono Basin; 2 = Newberry; 3 = LdMVF
 
 
 if case_study == 0
@@ -48,7 +48,7 @@ elseif case_study == 1
     P = 250;
     
     rhoh_fixed = 1000;
-    c = 1.15;
+    c = 1.05;
     labflag = 1;
 
     T1 = 750; T2 = 800;
@@ -74,7 +74,7 @@ elseif case_study == 2
     q1 = 1/melt_rho(P, T1, w1, labflag);
     q2 = 1/melt_rho(P, T2, w2, labflag);
     
-    rhob_fixed = [25 50];
+    rhob_fixed = [33 25 50];
 
 elseif case_study == 3
     %LdMVF
@@ -163,7 +163,7 @@ contour(w,T,1./sigm',v,'-k','LineWidth',2,'ShowText','on'); hold on
 v = (2:9)'*(10.^(-4:1:4));
 contour(w,T,1./sigm',v(:),'--k','LineWidth',0.5,'ShowText','on'); hold on
 
-ylabel('Temperature (^oC)')
+ylabel('Temperature (°C)')
 xlabel('Dissolved Water Content (wt%)')
 title('(a) Melt Resistivity (\Omegam)')
 set(gca,'FontSize',14)
@@ -234,7 +234,7 @@ pcolor(w,T,phi'); colormap(parula(10)); hold on
 hcb = colorbar; shading flat
 hcb.Label.String = 'Melt Fraction';
 xlabel('Dissolved H2O wt%')
-ylabel('Temperature (C)')
+ylabel('Temperature (°C)')
 caxis([0 1])
 
 title(['(c) Fixed \rho_b = ',num2str(rhob_fixed(1)),' \Omegam'])
@@ -250,16 +250,19 @@ p.FaceAlpha = 0.1;
 plot(w1,T1,'ok','MarkerFaceColor','b','MarkerSize',markersize)
 plot(w2,T2,'ok','MarkerFaceColor','r','MarkerSize',markersize)
 
+if case_study == 3
+    %Plot volatile resistivity as a function of T+++++++++++++++++++++++++++
+    figure(3);
+    plot(T,rhof_param(:,1),'-k','LineWidth',3); hold on
+    plot(T,rhof_param(:,2),'--k','LineWidth',3);
+    xlabel('Temperature (°C)')
+    ylabel('Resistivity of Volatile Phase (\Omegam)')
+    set(gca,'FontSize',20)
+    legend('1 wt% NaCl Equivalent','16 wt% NaCl Equivalent')
+    grid on
+    axis([min(T) max(T) 0 10])
 
-%Plot volatile resistivity as a function of T+++++++++++++++++++++++++++
-figure(3);
-plot(T,rhof_param(:,1),'-k','LineWidth',3); hold on
-plot(T,rhof_param(:,2),'--k','LineWidth',3);
-xlabel('Temperature (^oC)')
-ylabel('Resistivity of Volatile Phase (\Omegam)')
-set(gca,'FontSize',20)
-legend('1 wt% NaCl Equivalent','16 wt% NaCl Equivalent')
-grid on
+end
 
 %----------------------------------------------------------------------
 % MELTS COUPLING----------------------------------------------------------
@@ -340,7 +343,7 @@ colormap(parula(10));
 hcb = colorbar; shading flat
 hcb.Label.String = 'Melt Fraction';
 xlabel('Total System H2O wt%')
-ylabel('Temperature (C)')
+ylabel('Temperature (°C)')
 axis([min(H2O_sys) max(H2O_sys) min(T) max(T)])
 caxis([0 1])
 
@@ -353,7 +356,6 @@ v = [-1 10^-2 10];
 contour(H2O_sys,T,eps_h,v,'--k','LineWidth',2,'ShowText','off')
 
 set(gca,'FontSize',14)
-
 
 v = 0:10;
 [C,h] = contour(H2O_sys,T,(H2O_m),v,'--','ShowText','on','LineColor',[0.2 0.2 0.2]);
@@ -400,7 +402,7 @@ for rhocount = 1:length(rhob_fixed)
 
     end
     
-    if rhocount==1
+    if rhocount==1 && case_study ~= 2
         figure(1); subplot(1,3,3);plot(finalwater(finalvolatile<=0,rhocount),finaltemp(finalvolatile<=0,rhocount),'-w','LineWidth',3)
     end
     
@@ -434,7 +436,16 @@ for rhocount = 1:length(rhob_fixed)
     
 end
 
-
+% figure(2)
+% if case_study == 0  
+%     text(2.5,750,'Saturated Partial Melt','FontWeight','bold')
+%     text(1.5,850,'Under-Saturated','FontWeight','bold')
+%     text(1.7,835,'Partial Melt','FontWeight','bold')
+%     text(2.2,950,'Super-liquidus Melt','FontWeight','bold')
+%     text(4.5,905,'Saturated','FontWeight','bold')
+%     text(4.3,890,'Super-Liquidus','FontWeight','bold')
+%     text(4.6,875,'Melt','FontWeight','bold')
+% end
 
 
 
