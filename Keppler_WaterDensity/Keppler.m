@@ -6,7 +6,7 @@ function [sigf] = Keppler(P,T,con,flag)
 %
 % Usage: [sigf] = keppler(P,T,con,flag)
 %
-%   Inputs: P = Presure in MPa
+%   Inputs: P = Pressure in MPa
 %           T = Temperature in Celsius
 %           con = Concentration in wt% (can be NaCl or HCl wt% equivalent)
 %           flag = 1, 2, or 3 to choose which empirical relation to use
