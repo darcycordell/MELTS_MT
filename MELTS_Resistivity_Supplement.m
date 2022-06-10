@@ -53,11 +53,11 @@ set(gca,'FontSize',14)
 manual_legend('Guo et al. (2016)','-k','Gaillard (2004)','-r');
 
 subplot(2,1,2)
-v = -4:0.5:4;
-contour(w,T,dsig',v,'-k','LineWidth',2,'ShowText','on'); hold on
+v = 100*[-4:0.5:4];
+contour(w,T,100*dsig',v,'-k','LineWidth',2,'ShowText','on'); hold on
 
-v = -4:0.1:1;
-contour(w,T,dsig',v,'--k','LineWidth',1,'ShowText','on'); hold on
+v = 100*[-4:0.1:1];
+contour(w,T,100*dsig',v,'--k','LineWidth',1,'ShowText','on'); hold on
 
 ylabel('Temperature (^oC)')
 xlabel('Dissolved Water Content (wt%)')
@@ -66,7 +66,7 @@ grid on
 title('% Difference in Melt Resistivity (\Omegam)')
 set(gca,'FontSize',14)
 
-% SUPPLEMENTARY FIGURE 2: PRESSURE EFFECTS GUO--------------------------
+%% SUPPLEMENTARY FIGURE 2: PRESSURE EFFECTS GUO--------------------------
 clearvars;
 
 T = 850;
@@ -86,7 +86,7 @@ grid on
 set(gca,'FontSize',14)
 set(gca,'XLim',[0 7])
 
-% SUPPLEMENTARY FIGURE 3 AND 7: CRYSTAL RESISTIVITY AND EFFECTS----------
+%% SUPPLEMENTARY FIGURE 3 AND 7: CRYSTAL RESISTIVITY AND EFFECTS----------
 clearvars; 
 
 T = 700:1000;
@@ -133,7 +133,7 @@ set(gca,'FontSize',14)
 grid on
 manual_legend('Variable \rho_c','-k','Fixed \rho_c','--r');
 
-% SUPPLEMENTARY FIGURES 5 AND 6: COMPARE MIXING RELATIONS-----------------
+%% SUPPLEMENTARY FIGURES 5 AND 6: COMPARE MIXING RELATIONS-----------------
 %This section compares three mixing relations: Modified Archie's Law with 
 % m = 1.15, MAL with m = 1.5 and Hashin-Shtrikman upper bound (HS+)
 
@@ -213,7 +213,7 @@ set(gca,'FontSize',14)
 grid on
 grid minor
 
-
+%
 %Another way to show the difference is to plot as contours at specific
 %fixed bulk resistivity values as a function of melt fraction and melt
 %resistivity
@@ -222,11 +222,22 @@ chi = 0:0.005:1;
 sigb = nan(length(chi),length(sigf_fixed));
 sigbHS = nan(size(sigb));
 sigb_lowc = nan(size(sigb));
+% sigb_varc = nan(size(sigb));
 for i = 1:length(sigf_fixed)
     for j = 1:length(chi)
         sigb(j,i) = MAL(1/rhom_fixed,sigf_fixed(i),c,chi(j));
         sigbHS(j,i) = HS(1/rhom_fixed,sigf_fixed(i),chi(j));
         sigb_lowc(j,i) = MAL(1/rhom_fixed,sigf_fixed(i),c1,chi(j));
+        
+        if chi(j) > 0.4
+            
+            mvar(j,i) = 1;
+            sigb_varc(j,i) = MAL(1/rhom_fixed,sigf_fixed(i),1,chi(j));
+        else
+            
+            mvar(j,i) = -2.75*chi(j) +2.1;
+            sigb_varc(j,i) = MAL(1/rhom_fixed,sigf_fixed(i),mvar(j,i),chi(j));
+        end
         
     end
 end
@@ -237,13 +248,15 @@ v = 10.^(-4:1:4);
 contour(1./sigf_fixed,chi,1./sigb,v,'-k','LineWidth',2,'ShowText','on'); hold on
 contour(1./sigf_fixed,chi,1./sigb_lowc,v,'--r','LineWidth',2,'ShowText','on'); hold on
 contour(1./sigf_fixed,chi,1./sigbHS,v,':b','LineWidth',2,'ShowText','on'); hold on
+contour(1./sigf_fixed,chi,1./sigb_varc,v,'-g','LineWidth',2,'ShowText','on'); hold on
+
 
 set(gca,'XScale','log')
 
 xlabel('Melt Resistivity (\Omegam)')
 ylabel('Melt Fraction')
 title('Bulk Resistivity (\Omegam)')
-manual_legend(['MAL (m = ',num2str(c),')'],'-k',['MAL (m = ',num2str(c1),')'],'--r','HS+',':b');
+manual_legend(['MAL (m = ',num2str(c),')'],'-k',['MAL (m = ',num2str(c1),')'],'--r',['MAL (m = variable)'],'-g','HS+',':b');
 
 set(gca,'FontSize',14)
 
@@ -251,7 +264,7 @@ grid on
 grid minor
 
 
-% SUPPLEMENTARY FIGURE 4: PRESSURE EFFECT MVP RESISTIVITY----------------
+%% SUPPLEMENTARY FIGURE 4: PRESSURE EFFECT MVP RESISTIVITY----------------
 clearvars; 
 T = 650:1000;
 
