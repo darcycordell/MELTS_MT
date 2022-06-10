@@ -28,5 +28,9 @@ elseif flag == 5 %RHYOLITE Gaillard (2004)
     a = -78.9*log(w)+754;
     b = -2925*log(w)+64132;
     sigf = a.*exp((-b+2*P)./(8.3144621*(T+273)));
+    
+elseif flag == 6 %BASALT Ni (2011)
+    
+    sigf = 10^(2.172-(860.82-204.46*sqrt(w))/(T+273-1146.8));
 
 end
