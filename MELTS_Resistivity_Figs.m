@@ -51,7 +51,7 @@ elseif case_study == 1
     c = 1.05;
     labflag = 1;
 
-    T1 = 750; T2 = 800;
+    T1 = 750; T2 = 850;
     w1 = 4; w2 = 5;
     q1 = 1/melt_rho(P, T1, w1, labflag);
     q2 = 1/melt_rho(P, T2, w2, labflag);
@@ -74,7 +74,7 @@ elseif case_study == 2
     q1 = 1/melt_rho(P, T1, w1, labflag);
     q2 = 1/melt_rho(P, T2, w2, labflag);
     
-    rhob_fixed = [33 25 50];
+    rhob_fixed = [38 25 50];
 
 elseif case_study == 3
     %LdMVF
@@ -203,11 +203,13 @@ if case_study ~= 0
         melt1 = InterX(h,[q1 q1; 0 1]);
         melt2 = InterX(h,[q2 q2; 0 1]);
 
-        if sum([~isempty(melt1) ~isempty(melt2)])==2 && i == 1
-            subplot(1,3,2)
-            plot(melt1(1),melt1(2),'ok','MarkerFaceColor','b','MarkerSize',markersize)
-            plot(melt2(1),melt2(2),'ok','MarkerFaceColor','r','MarkerSize',markersize)
-
+        if sum([~isempty(melt1) ~isempty(melt2)])==2
+            
+            if i == 1
+                subplot(1,3,2)
+                plot(melt1(1),melt1(2),'ok','MarkerFaceColor','b','MarkerSize',markersize)
+                plot(melt2(1),melt2(2),'ok','MarkerFaceColor','r','MarkerSize',markersize)
+            end
             %Max and Min melt fraction estimate using the "original" or
             %"standard" interpretation with no thermodynamic constraint
             maxmeltorig(i) = melt1(2);
@@ -227,15 +229,21 @@ set(gca,'FontSize',14)
 plot([q1 q1],[0 1],'-b','LineWidth',2)
 plot([q2 q2],[0 1],'-r','LineWidth',2)
 
+phi(phi==1) = 1.1;
+
+cmap = parula(22);
+cmap = cmap(2:2:end,:);
 
 %Reparameterizing the above parameter spaces++++++++++++++++++++++++++++
 subplot(1,3,3)
-pcolor(w,T,phi'); colormap(parula(10)); hold on
+pcolor(w,T,phi'); colormap(cmap); hold on
 hcb = colorbar; shading flat
 hcb.Label.String = 'Melt Fraction';
+hcb.Ticks = 0:0.1:1;
+hcb.TickLabels = num2cell(0:0.1:1);
 xlabel('Dissolved H2O wt%')
 ylabel('Temperature (°C)')
-caxis([0 1])
+caxis([0 1.1])
 
 title(['(c) Fixed \rho_b = ',num2str(rhob_fixed(1)),' \Omegam'])
 
@@ -335,17 +343,29 @@ end
 %saturation level)
 H2O_m(eps_f>0) = NaN;
 
+%Set "liquidus" to 0.99 melt
+ind0 = find(eps_h<=0.01);
+eps_h(ind0) = 0;
+eps_m(ind0) = 1 - eps_f(ind0);
+
+eps_m(eps_m==1) = 1.1;
+
 
 %PLOT MELTS PARAMETER SPACE--------------------------------------------
 figure(2)
 pcolor(H2O_sys,T,(eps_m)); view([0 90]); hold on
-colormap(parula(10));
+
+% v = [-1 0.01 1000];
+% contour(H2O_sys,T,eps_m,v,'--w','LineWidth',3)
+colormap(cmap);
 hcb = colorbar; shading flat
 hcb.Label.String = 'Melt Fraction';
+hcb.Ticks = 0:0.1:1;
+hcb.TickLabels = num2cell(0:0.1:1);
 xlabel('Total System H2O wt%')
 ylabel('Temperature (°C)')
 axis([min(H2O_sys) max(H2O_sys) min(T) max(T)])
-caxis([0 1])
+caxis([0 1.1])
 
 %--------------------SATURATION CURVE----------------------
 v = [-1 10^-4 10];
@@ -394,7 +414,7 @@ for rhocount = 1:length(rhob_fixed)
 
     A(:,A(1,:)==rhob_fixed(rhocount))=[];
 
-    finalx = []; finalmelt = []; finalvolatile = []; finalwater = []; finaltemp = [];
+    %finalx = []; finalmelt = []; finalvolatile = []; finalwater = []; finaltemp = [];
     for i = 1:length(A(1,:))
 
         [finalx(i,rhocount),finalmelt(i,rhocount),finalvolatile(i,rhocount),finalwater(i,rhocount)] = volfrac(P,A(2,i),A(1,i));
