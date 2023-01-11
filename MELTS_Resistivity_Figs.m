@@ -12,7 +12,7 @@
 clearvars; close all
 
 
-case_study = 2; % 0 = synthetic; 1 = Mono Basin; 2 = Newberry; 3 = LdMVF
+case_study = 3; % 0 = synthetic; 1 = Mono Basin; 2 = Newberry; 3 = LdMVF
 
 
 if case_study == 0
@@ -20,7 +20,7 @@ if case_study == 0
     w = 0.25:0.01:6; %*dissolved water content* in wt% (in the melt)
     H2O_sys = w; %Total system water content in wt%
     T = 700:1:1000; %Temperature in C
-    P = 100; %Pressure in MPa
+    P = 150; %Pressure in MPa
     
     rhoh_fixed = 1000; %Crystal or host resistivity in Ohm m
     c = 1.5; % Modified Archie's Law connectivity parameter 1.0 < c < 1.5 for melt
@@ -38,7 +38,7 @@ if case_study == 0
     q2 = 1/melt_rho(P, T2, w2, labflag);
     
     % This is the bulk resistivity of the anomaly in Ohm m
-    rhob_fixed = 2;
+    rhob_fixed = 1;
 
 elseif case_study == 1
     %Mono Basin
@@ -60,9 +60,9 @@ elseif case_study == 1
 
 elseif case_study == 2
     %Newberry
-    w = 0.25:0.01:7;
+    w = 0.25:0.01:4.5;
     H2O_sys = w;
-    T = 650:1:950;
+    T = 725:1:950;
     P = 100;
     
     rhoh_fixed = 1000;
@@ -75,19 +75,20 @@ elseif case_study == 2
     q2 = 1/melt_rho(P, T2, w2, labflag);
     
     rhob_fixed = [38 25 50];
+    rhob_fixed = 25;
 
 elseif case_study == 3
     %LdMVF
-    w = 0.25:0.01:7;
+    w = 0.25:0.01:5.5;
     H2O_sys = w;
-    T = 650:1:1100;
+    T = 725:1:1100;
     P = 100;
     
     rhoh_fixed = 1000;
     c = 1.5;
     labflag = 1;
 
-    T1 = 760; T2 = 1000;
+    T1 = 760; T2 = 850;
     w1 = 4; w2 = 5;
     q1 = 1/melt_rho(P, T1, w1, labflag);
     q2 = 1/melt_rho(P, T2, w2, labflag);
@@ -236,6 +237,8 @@ cmap = cmap(2:2:end,:);
 
 %Reparameterizing the above parameter spaces++++++++++++++++++++++++++++
 subplot(1,3,3)
+
+figure(97)
 pcolor(w,T,phi'); colormap(cmap); hold on
 hcb = colorbar; shading flat
 hcb.Label.String = 'Melt Fraction';
@@ -245,7 +248,7 @@ xlabel('Dissolved H2O wt%')
 ylabel('Temperature (°C)')
 caxis([0 1.1])
 
-title(['(c) Fixed \rho_b = ',num2str(rhob_fixed(1)),' \Omegam'])
+title(['Fixed \rho_b = ',num2str(rhob_fixed(1)),' \Omegam'])
 
 v = (0:0.1:1);
 contour(w,T,phi',v,':k','LineWidth',1,'ShowText','on')
@@ -310,6 +313,7 @@ eps_m = nan(size(rhob)); %Melt volume fraction from MELTS
 eps_f = nan(size(rhob)); %Volatile volume fraction from MELTS
 H2O_m = nan(size(rhob)); %Dissolved melt content wt% from MELTS
 rhof = nan(length(T),1); %Volatile resistivity
+
 for i = 1:length(T)
     
     %Volatile resistivity computed using Sinmyo and Keppler (2017)
@@ -335,7 +339,7 @@ rhob(eps_m<=cutoff) = NaN;
 eps_f(eps_m<=cutoff) = NaN;
 eps_m(eps_m<=cutoff) = NaN;
 
-if case_study <= 1 %For synthetic case and Mono Basin ignore saturated regime
+if case_study <= 3 %For synthetic case and Mono Basin ignore saturated regime
     rhob(eps_f>0) = NaN;
 end
 
@@ -377,9 +381,9 @@ contour(H2O_sys,T,eps_h,v,'--k','LineWidth',2,'ShowText','off')
 
 set(gca,'FontSize',14)
 
-v = 0:10;
-[C,h] = contour(H2O_sys,T,(H2O_m),v,'--','ShowText','on','LineColor',[0.2 0.2 0.2]);
-clabel(C,h,'Color',[0.2 0.2 0.2],'FontName','Courier')
+%v = 0:10;
+%[C,h] = contour(H2O_sys,T,(H2O_m),v,'--','ShowText','on','LineColor',[0.2 0.2 0.2]);
+%clabel(C,h,'Color',[0.2 0.2 0.2],'FontName','Courier')
 
 if case_study ~= 0 
 v = [-1 w1 1000];
@@ -392,8 +396,8 @@ w2contour = w2contour(:,2:end)';
 
 end
 
-[C1,h1] = contour(H2O_sys,T,(eps_f),'--','ShowText','on','LineColor',[1 0 0]);
-clabel(C1,h1,'Color',[1 0 0],'FontName','Courier')
+% [C1,h1] = contour(H2O_sys,T,(eps_f),'--','ShowText','on','LineColor',[1 0 0]);
+% clabel(C1,h1,'Color',[1 0 0],'FontName','Courier')
 
 v = 10.^(-2:2)'*(1:9);
 v = v(:);
@@ -422,8 +426,10 @@ for rhocount = 1:length(rhob_fixed)
 
     end
     
-    if rhocount==1 && case_study ~= 2
-        figure(1); subplot(1,3,3);plot(finalwater(finalvolatile<=0,rhocount),finaltemp(finalvolatile<=0,rhocount),'-w','LineWidth',3)
+    if rhocount==1 %&& case_study ~= 2
+        figure(1); subplot(1,3,3);
+        figure(97);
+        plot(finalwater(finalvolatile<=0,rhocount),finaltemp(finalvolatile<=0,rhocount),'-w','LineWidth',3)
     end
     
     if case_study == 1

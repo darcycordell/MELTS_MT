@@ -24,20 +24,23 @@ function [phi] = MAL_solve_phi(rho_b,rho_h,rho_f,m)
 % starting guess of 0.5 is used.
 
 % Check for input errors first:
-flag = 0;
-if rho_b > rho_h
+flag = 0; indnan = [];
+if any(rho_b > rho_h)
     disp('Bulk resistivity cannot be greater than matrix resistivity')
     flag = 1;
+    indnan = [indnan find(rho_b>rho_h)];
 end
 
-if rho_b < rho_f
+if any(rho_b < rho_f)
     disp('Bulk resistivity cannot be less than fluid resistivity')
     flag = 1;
+    indnan = [indnan find(rho_b<rho_f)];
 end
 
-if rho_f > rho_h
+if any(rho_f > rho_h)
     disp('Fluid resistivity cannot be greater than matrix resistivity')
     flag = 1;
+    indnan = [indnan find(rho_f>rho_h)];
 end
 
 sigb = 1./rho_b;
@@ -48,5 +51,5 @@ phi = ((sigb-sigh)./(sigf-sigh)).^(1/m);
 
 
 if flag == 1
-    phi = 1;
+    phi(indnan) = NaN;
 end
